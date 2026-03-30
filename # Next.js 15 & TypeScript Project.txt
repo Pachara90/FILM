@@ -1,18 +1,46 @@
+<!-- BEGIN:nextjs-agent-rules -->
+
+# Important: This is NOT traditional Next.js
+
+Next.js 15 introduces **breaking changes** in APIs, conventions, and project structure.  
+Do NOT rely on outdated patterns.
+
+Before implementing any feature:
+- Read docs from `node_modules/next/dist/docs/`
+- Check for deprecations
+- Follow App Router best practices strictly
+
 # Next.js 15 & TypeScript Project Rules
 
 ## 1. Technical Stack
-- Framework: Next.js 15 (App Router)
+- Framework: Next.js 15+ (App Router)
 - Language: TypeScript (Strict mode)
 - Styling: Tailwind CSS
 - Components: Shadcn UI (Radix UI)
 - Icons: Lucide React
 - Validation: Zod
+- Database: PostgreSQL
+- DB Management (optional): Dbeaver
+- ORM: Drizzle ORM
+<!-- - Runtime & Package Management: Bun -->
 
 ## 2. General Principles
-- **No 'any'**: Never use the `any` type. Define proper interfaces or types.
+- **No 'any'**: Avoid `any`. Use `unknown` or proper types whenever possible.
 - **Functional Components**: Use arrow functions for all components.
 - **Client vs Server**: Default to Server Components. Use `'use client'` only when interactivity (useState, useEffect) or browser APIs are required.
 - **Clean Code**: Follow DRY (Don't Repeat Yourself) and SOLID principles.
+- **Docker & Containerization**:
+    - The application MUST run inside Docker containers
+    - Use Docker for both development and production environments
+    - Do NOT rely on local machine dependencies
+    - Use `docker-compose` to orchestrate services
+    - Define at least:
+        - `app` (Next.js)
+        - `db` (PostgreSQL)
+    - Use service name for internal communication (e.g., `db`, not `localhost`)
+    - Persist database using volumes
+    - Use `docker-compose up --build` to start services
+    - Rebuild containers after dependency changes
 
 ## 3. Naming Conventions
 - Components: PascalCase (e.g., `UserButton.tsx`)
@@ -23,17 +51,63 @@
 - `/app`: All routes and layouts.
 - `/components/ui`: Atomic components (Shadcn).
 - `/components/shared`: Reusable business components.
-- `/lib`: Server-side utilities, DB clients (Prisma/Drizzle).
+- `/lib`: Server-side utilities, DB clients (Drizzle).
 - `/hooks`: Custom React hooks.
 - `/types`: Shared TypeScript definitions.
 
 ## 5. Agent-Specific Instructions
 - **Plan First**: Before writing code, summarize the plan in the chat and ask for confirmation.
 - **Check Environment**: Always verify if required environment variables exist in `.env.example` before implementation.
-- **Verify Build**: After significant changes, run `npm run build` or `next lint` to ensure no regressions.
+<!-- - **Verify Build**: After significant changes, run `npm run build` or `next lint` to ensure no regressions. --> // ใช้กับ Next.js
+<!-- - **Verify Build**: After significant changes, run `bun run build` or `bun run lint` to ensure no regressions. --> // ใช้กับ Bun
 - **Error Handling**: Always wrap async operations (API routes, Server Actions) in try-catch blocks and use Zod for input validation.
 
 ## 6. CSS & UI
 - Use Tailwind CSS for all styling.
 - Avoid inline styles.
 - Ensure responsive design (mobile-first).
+
+## 7. Server Actions
+- Prefer Server Actions over API routes
+- Use for mutations (create/update/delete)
+- Keep business logic inside Server Actions
+
+## 8. Environment Variable
+- Use `process.env` only in Server Components / Server Actions
+- Client-side variables must use `NEXT_PUBLIC_`
+
+## 9. Database access boundary
+- Only accessible via Server Components / Server Actions / lib
+- Never expose DB logic to client
+- All schema changes must go through Drizzle migrations
+- Do NOT modify database manually in production
+
+## 10. Data Fetching
+- Use native `fetch` with caching (`no-store`, `revalidate`)
+- Prefer server-side fetching
+- Use `cache: 'no-store'` for dynamic data
+- Use `revalidate` for ISR (Incremental Static Regeneration)
+
+## 11. Security
+- Validate all inputs with Zod
+- Never trust client input
+- Use HTTPS in production
+- Protect sensitive routes (authentication/authorization)
+- Do not expose stack traces in production
+
+## 12. Performance
+- Prefer Server Components
+- Minimize client bundle
+- Use dynamic rendering only when necessary
+- Avoid unnecessary re-renders in client components
+- Use caching (`revalidate`) properly
+
+## 13. Logging
+- Log all server errors properly
+- Avoid console.log in production
+
+## 14. Architecture
+- Separate business logic from UI
+- Do not write business logic inside components
+
+<!-- END:nextjs-agent-rules -->
