@@ -1,7 +1,7 @@
 # Next.js Best Practices & Rules
 
 ## Tech Stack Prefereces
-- Framework: Next.js 14+ (App Router)
+- Framework: Next.js 15+ (App Router)
 - Language: TypeScript (Strict mode)
 - Styling: Tailwind CSS
 - Components: Lucide React for icons, Shadcn UI for components
