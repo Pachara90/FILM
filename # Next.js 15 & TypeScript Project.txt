@@ -20,95 +20,209 @@ Before implementing any feature:
 - Icons: Lucide React
 - Validation: Zod
 - Database: PostgreSQL
-- DB Management (optional): Dbeaver
 - ORM: Drizzle ORM
-- notification: SweetAlert2
-<!-- - Runtime & Package Management: Bun -->
+- Notifications: SweetAlert2
+- Package Manager: npm (default) | pnpm | yarn (choose one)
+
+---
 
 ## 2. General Principles
 - **No 'any'**: Avoid `any`. Use `unknown` or proper types whenever possible.
 - **Functional Components**: Use arrow functions for all components.
 - **Client vs Server**: Default to Server Components. Use `'use client'` only when interactivity (useState, useEffect) or browser APIs are required.
 - **Clean Code**: Follow DRY (Don't Repeat Yourself) and SOLID principles.
-- **Docker & Containerization**:
-    - The application MUST run inside Docker containers
-    - Use Docker for both development and production environments
-    - Do NOT rely on local machine dependencies
-    - Use `docker-compose` to orchestrate services
-    - Define at least:
-        - `app` (Next.js)
-        - `db` (PostgreSQL)
-    - Use service name for internal communication (e.g., `db`, not `localhost`)
-    - Persist database using volumes
-    - Use `docker-compose up --build` to start services
-    - Rebuild containers after dependency changes
+- **Immutability**: Prefer `const` over `let`. Use spread/set for state updates.
+- **Error Boundaries**: Implement proper error boundaries and fallback UIs.
+
+---
 
 ## 3. Naming Conventions
 - Components: PascalCase (e.g., `UserButton.tsx`)
 - Folders/Files in App Router: kebab-case (e.g., `user-profile/page.tsx`)
 - Utils/Hooks: camelCase (e.g., `useLocalStorage.ts`)
+- Constants: UPPER_SNAKE_CASE (e.g., `MAX_RETRY_COUNT`)
+- Types/Interfaces: PascalCase with `I` prefix for interfaces (e.g., `IUserProps`)
+- Database Tables: snake_case (e.g., `user_profiles`)
+
+---
 
 ## 4. Folder Structure Standards
-- `/app`: All routes and layouts.
-- `/components/ui`: Atomic components (Shadcn).
-- `/components/shared`: Reusable business components.
-- `/lib`: Server-side utilities, DB clients (Drizzle).
-- `/hooks`: Custom React hooks.
-- `/types`: Shared TypeScript definitions.
+- `/app`: All routes and layouts (App Router)
+- `/components/ui`: Atomic Shadcn UI components (button, input, dialog, etc.)
+- `/components/common`: Shared reusable components across features
+- `/components/features`: Feature-specific components (e.g., `user-profile/ProfileCard`)
+- `/components/layout`: Layout components (header, sidebar, footer)
+- `/lib`: Server-side utilities, DB clients (Drizzle), business logic
+- `/hooks`: Custom React hooks
+- `/types`: Shared TypeScript definitions
+- `/db`: Database schemas, migrations, seeds
+- `/public`: Static assets (images, fonts, etc.)
+
+---
 
 ## 5. Agent-Specific Instructions
 - **Plan First**: Before writing code, summarize the plan in the chat and ask for confirmation.
 - **Check Environment**: Always verify if required environment variables exist in `.env.example` before implementation.
-<!-- - **Verify Build**: After significant changes, run `npm run build` or `next lint` to ensure no regressions. --> // ใช้กับ Next.js
-<!-- - **Verify Build**: After significant changes, run `bun run build` or `bun run lint` to ensure no regressions. --> // ใช้กับ Bun
+- **Minimal Changes**: Only modify files directly related to the feature. Avoid unnecessary refactors.
+- **Verify Build**: After significant changes, run `npm run build` to ensure no regressions.
 - **Error Handling**: Always wrap async operations (API routes, Server Actions) in try-catch blocks and use Zod for input validation.
+- **Commit Quality**: Write clear, descriptive commit messages following Conventional Commits format.
+
+---
 
 ## 6. CSS & UI
 - Use Tailwind CSS for all styling.
-- Avoid inline styles.
+- Avoid inline styles except for dynamic values (e.g., CSS variables).
 - Ensure responsive design (mobile-first).
+- Use `cn()` utility from Shadcn for conditional classes.
+- Implement dark mode support using Tailwind's `dark:` variant.
+- Provide accessible UI with proper ARIA labels and keyboard navigation.
+
+---
 
 ## 7. Server Actions
-- Prefer Server Actions over API routes
-- Use for mutations (create/update/delete)
-- Keep business logic inside Server Actions
+- Prefer Server Actions over API routes for mutations.
+- Use for create, update, delete operations.
+- Keep business logic inside Server Actions or dedicated service files.
+- Return consistent response format: `{ success: boolean, data?: T, error?: string }`.
+- Always revalidate relevant paths after mutation using `revalidatePath` or `revalidateTag`.
+
+---
 
 ## 8. Environment Variable
-- Use `process.env` only in Server Components / Server Actions
-- Client-side variables must use `NEXT_PUBLIC_`
+- Use `process.env` only in Server Components / Server Actions.
+- Client-side variables must use `NEXT_PUBLIC_` prefix.
+- Never expose sensitive keys to client.
+- Always provide `.env.example` with dummy values and descriptions.
+- Use Zod to validate environment variables at runtime.
 
-## 9. Database access boundary
-- Only accessible via Server Components / Server Actions / lib
-- Never expose DB logic to client
-- All schema changes must go through Drizzle migrations
-- Do NOT modify database manually in production
+---
+
+## 9. Database Access Boundary
+- Only accessible via Server Components, Server Actions, or `lib/` modules.
+- Never expose database logic or raw queries to client-side code.
+- All schema changes must go through Drizzle migrations.
+- Do NOT modify database manually in production.
+- Use transactions for multiple related queries to ensure data integrity.
+- Configure connection pooling for production environments.
+- Implement database seeding scripts for development and testing.
+
+---
 
 ## 10. Data Fetching
-- Use native `fetch` with caching (`no-store`, `revalidate`)
-- Prefer server-side fetching
-- Use `cache: 'no-store'` for dynamic data
-- Use `revalidate` for ISR (Incremental Static Regeneration)
+- Use native `fetch` with appropriate caching strategies.
+- Server-side fetching is preferred for all data retrieval.
+- Use `cache: 'no-store'` for dynamic, real-time data.
+- Use `next: { revalidate }` for ISR (Incremental Static Regeneration).
+- Implement loading states with `loading.tsx` or `Suspense` boundaries.
+- Handle errors gracefully with `error.tsx` error boundaries.
+- Use parallel data fetching with `Promise.all` when possible.
+
+---
 
 ## 11. Security
-- Validate all inputs with Zod
-- Never trust client input
-- Use HTTPS in production
-- Protect sensitive routes (authentication/authorization)
-- Do not expose stack traces in production
+- Validate all inputs with Zod on both client and server.
+- Never trust client input; always re-validate on server.
+- Use HTTPS in production.
+- Protect sensitive routes with middleware authentication/authorization checks.
+- Do not expose stack traces in production; use generic error messages.
+- Implement rate limiting for API routes to prevent abuse.
+- Sanitize user-generated content to prevent XSS attacks.
+- Use HTTP security headers (CSP, HSTS, X-Frame-Options, etc.).
+
+---
 
 ## 12. Performance
-- Prefer Server Components
-- Minimize client bundle
-- Use dynamic rendering only when necessary
-- Avoid unnecessary re-renders in client components
-- Use caching (`revalidate`) properly
+- Prefer Server Components to reduce client-side JavaScript.
+- Minimize client bundle by lazy loading with `dynamic()` import.
+- Use `next/image` for optimized images with proper sizing.
+- Implement streaming with `Suspense` for slow data fetching.
+- Avoid unnecessary re-renders in client components using `useMemo` and `useCallback`.
+- Use proper caching strategies with `revalidate` and `cache` tags.
+- Profile and monitor bundle size with `@next/bundle-analyzer`.
+
+---
 
 ## 13. Logging
-- Log all server errors properly
-- Avoid console.log in production
+- Log all server errors properly with context (timestamp, user, action).
+- Use structured logging (e.g., JSON format) for better parsing.
+- Avoid `console.log` in production; use proper logging libraries (e.g., Pino, Winston).
+- Log only necessary information, never sensitive data (passwords, tokens).
+
+---
 
 ## 14. Architecture
-- Separate business logic from UI
-- Do not write business logic inside components
+- Separate business logic from UI components.
+- Do not write business logic inside components.
+- Use service layer pattern: `lib/services/*.ts` for business operations.
+- Follow domain-driven design for complex applications.
+- Keep API surface small and focused.
+
+---
+
+## 15. State Management
+- **Server State**: Use React Server Components + native fetch (preferred).
+- **Client State**: Use Zustand or Jotai for complex client state (if needed).
+- **Form State**: Use React Hook Form + Zod for form validation.
+- **URL State**: Use `nuqs` or `useSearchParams` for search/filter params.
+- **Persisted State**: Use `useLocalStorage` custom hook or similar for browser storage.
+
+---
+
+## 16. Testing
+- **Unit Tests**: Vitest + React Testing Library for components and hooks.
+- **Integration Tests**: Test Server Actions and database interactions with test database.
+- **E2E Tests**: Playwright for critical user flows.
+- **Coverage Target**: >80% for critical paths.
+- Run tests before pushing: `npm run test`.
+- Never skip failing tests; fix or document the reason.
+
+---
+
+## 17. Version Control & CI/CD
+- **Branch Naming**: `feature/*`, `fix/*`, `chore/*`, `refactor/*`, `docs/*`.
+- **Commit Convention**: Follow Conventional Commits (`feat:`, `fix:`, `chore:`, etc.).
+- **PR Reviews**: All PRs require at least one review before merging.
+- **CI Pipeline**: Must pass linting, type-checking, and tests.
+- **Pre-commit Hooks**: Use Husky + lint-staged for automated checks.
+
+---
+
+## 18. Docker & Containerization
+- The application MUST run inside Docker containers for both development and production.
+- Use docker-compose to orchestrate services: `app` (Next.js), `db` (PostgreSQL).
+- Use service names for internal communication (e.g., `db`, not `localhost`).
+- Persist database using volumes; never lose data on container restart.
+- Use `docker-compose up --build` to start services with latest changes.
+- Rebuild containers after dependency changes (package.json, Dockerfile).
+- Use multi-stage builds in Dockerfile for smaller production images.
+- Include health checks for all services.
+
+---
+
+## 19. Development Tools
+- **IDE**: VS Code (recommended) with following extensions:
+  - Prettier (code formatter)
+  - ESLint (linting)
+  - Tailwind CSS IntelliSense
+  - TypeScript (error checking)
+- **DB GUI**: DBeaver (optional, for database inspection)
+- **API Testing**: Postman or Insomnia (optional, for API testing)
+
+---
+
+## 20. Pre-commit Checklist
+Before creating PR, verify:
+- [ ] TypeScript compilation passes: `npm run type-check`
+- [ ] Linting passes with no errors: `npm run lint`
+- [ ] Build succeeds: `npm run build`
+- [ ] No `console.log` in production code
+- [ ] Environment variables added to `.env.example`
+- [ ] Database migrations tested and working
+- [ ] Responsive design verified on mobile, tablet, and desktop
+- [ ] Loading and error states handled properly
+- [ ] Accessibility checks passed (ARIA labels, keyboard navigation)
+- [ ] All tests passing: `npm run test`
+- [ ] No hardcoded values; use configuration where appropriate
 
 <!-- END:nextjs-agent-rules -->
