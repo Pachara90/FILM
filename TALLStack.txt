@@ -13,10 +13,10 @@ Before implementing any feature:
 # Laravel TALL Stack + PostgreSQL Project Rules
 
 ## 1. Technical Stack
-- Backend Framework: Laravel 11+ (PHP 8.2+)
+- Backend Framework: Laravel 12+ (PHP 8.2+)
 - Frontend: Livewire 3+ (Full-stack components), Alpine.js 3+ (reactive sprinkles)
-- Styling: Tailwind CSS 3+ (utility-first)
-- Database: PostgreSQL (production), SQLite (testing)
+- Styling: Tailwind CSS 4+ (utility-first)
+- Database: PostgreSQL (production)
 - Validation: Laravel Form Requests + custom rules
 - Notifications: SweetAlert2 or Toastr (for flash messages)
 - Package Manager: Composer (PHP) + npm/yarn (Node assets)
