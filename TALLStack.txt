@@ -1,0 +1,202 @@
+<!-- BEGIN:laravel-tall-agent-rules -->
+
+# Important: This is Laravel TALL Stack
+
+TALL stack combines **Tailwind CSS, Alpine.js, Laravel, and Livewire** for modern, reactive full-stack applications.  
+Do NOT use outdated Laravel patterns (e.g., jQuery, Bootstrap, Blade-only without Livewire).
+
+Before implementing any feature:
+- Read latest docs from [Laravel](https://laravel.com/docs), [Livewire](https://laravel-livewire.com/docs), [Alpine.js](https://alpinejs.dev/start-here)
+- Check Laravel upgrade guides for breaking changes
+- Follow TALL stack best practices strictly
+
+# Laravel TALL Stack + PostgreSQL Project Rules
+
+## 1. Technical Stack
+- Backend Framework: Laravel 11+ (PHP 8.2+)
+- Frontend: Livewire 3+ (Full-stack components), Alpine.js 3+ (reactive sprinkles)
+- Styling: Tailwind CSS 3+ (utility-first)
+- Database: PostgreSQL (production), SQLite (testing)
+- Validation: Laravel Form Requests + custom rules
+- Notifications: SweetAlert2 or Toastr (for flash messages)
+- Package Manager: Composer (PHP) + npm/yarn (Node assets)
+- Asset Bundling: Vite (default via Laravel Vite plugin)
+
+---
+
+## 2. General Principles
+- **No Magic**: Avoid `any` types in PHP strictly typed files. Use type declarations (`int`, `string`, `array`, `?User`) everywhere.
+- **Blade + Livewire**: Default to Livewire components for dynamic behavior. Use Alpine.js only for tiny UI interations (dropdowns, modals, toggles) that don’t require server roundtrips.
+- **Clean Code**: Follow DRY, SOLID, and Laravel conventions.
+- **Eloquent over Raw Queries**: Use Eloquent ORM; fall back to Query Builder only for complex, performance-critical queries.
+- **Service Classes**: Extract business logic into dedicated service classes (`app/Services`). Do not put business logic in Controllers or Livewire components.
+- **Error Handling**: Use Laravel’s exception handling. Always return meaningful messages to the user via Livewire’s `$this->addError()` or flash sessions.
+
+---
+
+## 3. Naming Conventions (Laravel)
+- Controllers: Singular PascalCase with `Controller` suffix (e.g., `UserController.php`)
+- Livewire Components: PascalCase (e.g., `UserProfile.php` and `user-profile.blade.php`)
+- Models: Singular PascalCase (e.g., `User.php`), table: `users`
+- Migrations: `YYYY_MM_DD_HHMMSS_create_users_table.php`
+- Blade Files: kebab-case (e.g., `sidebar-menu.blade.php`)
+- Form Requests: PascalCase with `Request` suffix (e.g., `StoreUserRequest`)
+- Services: PascalCase with `Service` suffix (e.g., `PaymentService.php`)
+- Policies: PascalCase with `Policy` suffix (e.g., `UserPolicy.php`)
+
+---
+
+## 4. Folder Structure Standards (Laravel)
+- `app/Models`: Eloquent models
+- `app/Http/Controllers`: Controllers (thin, delegate to services)
+- `app/Livewire`: Livewire components (class + view)
+- `app/Services`: Application business logic
+- `app/Http/Requests`: Form request validation classes
+- `app/Policies`: Authorization policies
+- `app/View/Components`: Blade components (if any, non-Livewire)
+- `database/migrations`: Database structure changes
+- `database/seeders`: Seeding test/demo data
+- `resources/views/layouts`: Main layout files (app.blade.php)
+- `resources/views/livewire`: Livewire view files
+- `resources/views/components`: Reusable Blade components (button, card, etc.)
+- `resources/js`: Alpine.js initializations and custom JavaScript
+- `resources/css`: Tailwind imports and custom styles
+- `routes/web.php`: Web routes (use `Route::get`, `Route::middleware`, etc.)
+
+---
+
+## 5. Agent-Specific Instructions
+- **Plan First**: Before writing code, summarize the plan (which models, migrations, components) and ask for confirmation.
+- **Check Environment**: Ensure `.env` has all necessary variables (DB, mail, etc.) before implementation. Check `.env.example`.
+- **Minimal Changes**: Modify only files related to the feature. Don't refactor unrelated code.
+- **Verify Migrations**: Run `php artisan migrate:fresh --seed` locally to ensure database structure is correct.
+- **Error Handling**: Always wrap destructive operations in try-catch; use Livewire’s validation and error bag.
+- **Commit Quality**: Use Conventional Commits (e.g., `feat: add user registration`, `fix: resolve password reset token expiry`).
+
+---
+
+## 6. CSS & UI (Tailwind + Alpine)
+- Use Tailwind CSS utility classes exclusively; avoid inline styles.
+- Use `@apply` only in component layer (e.g., `btn-primary`) for repeated patterns.
+- Ensure responsive design (mobile-first) with Tailwind breakpoints.
+- For interactive UI, use Alpine.js data attributes (`x-data`, `@click`, `x-show`, etc.).
+- Keep Alpine components small and self-contained; heavy logic belongs in Livewire.
+- Use Livewire’s `wire:model`, `wire:click` for server-side interactions, Alpine for purely client-side.
+- Provide accessible UI with ARIA roles and keyboard navigation.
+
+---
+
+## 7. Livewire Best Practices
+- Use Livewire full-page components or nested components as needed.
+- Keep Livewire components focused; avoid "God" components.
+- Emit events (`$dispatch`) for cross-component communication only when necessary; prefer parent-child nesting.
+- Validate all public properties using Livewire’s `rules()` method or Form Objects (Livewire 3).
+- Use `wire:loading` for loading states, `wire:offline` for offline detection.
+- Lock properties with `wire:model.live` only when needed; prefer `wire:model.blur` for better performance.
+- Never trust client-side data; always re-validate on server.
+
+---
+
+## 8. Database & PostgreSQL
+- Use PostgreSQL as the primary database; take advantage of JSONB, full-text search, and advanced indexes.
+- All schema changes via Laravel migrations (`php artisan make:migration`).
+- Never modify the database manually in production.
+- Use Laravel’s query log for debugging only in development: `DB::enableQueryLog()`.
+- In development, use SQLite for fast testing; ensure PostgreSQL compatibility in production.
+- Set up connection pooling with tools like PgBouncer for high traffic applications.
+- Write `database/seeders` for demo data; use model factories for realistic test data.
+
+---
+
+## 9. Data Validation
+- Create dedicated Form Request classes (`php artisan make:request`) for complex validation.
+- For simple Livewire validation, define `rules()` method inside component.
+- Always validate on the server; never rely on client-side only.
+- Use custom validation rules for business-specific constraints.
+- Display validation errors with `@error` directive in Blade or `$this->addError()` in Livewire.
+
+---
+
+## 10. Security
+- Protect routes with middleware: `auth`, `verified`, `can` (policies).
+- Use Laravel’s built-in CSRF protection.
+- Implement authorization policies for all actions (`php artisan make:policy`).
+- Use Laravel Sanctum or Passport for API authentication if needed.
+- Sanitize user input automatically (Blade `{{ }}` escapes output). Use `{!! !!}` only for trusted HTML.
+- Configure security headers via `config/cors.php` and middleware (e.g., CSP, HSTS).
+- Store sensitive data encrypted using Laravel’s encryption (`Crypt::encrypt`).
+- Rate limiting on sensitive routes (login, registration) using `throttle` middleware.
+
+---
+
+## 11. Performance
+- **Eager Loading**: Always use `with()` to prevent N+1 queries.
+- **Caching**: Use Laravel’s cache system (Redis recommended) for expensive queries or fragments.
+- **Queues**: Offload long tasks (email sending, image processing) to queues (Redis/Horizon).
+- **Database Indexes**: Add indexes for frequently queried columns.
+- **Asset Optimization**: Run `npm run build` for production (Vite minifies assets).
+- **Lazy Loading Livewire**: Use `wire:init` to defer expensive operations.
+- **OPcache**: Ensure OPcache is enabled in production.
+
+---
+
+## 12. Logging & Monitoring
+- Use Laravel’s structured logging (`Log` facade). Set appropriate log levels.
+- Never log passwords or sensitive tokens.
+- Use `bugsnag`, `sentry`, or similar for production error tracking.
+- Monitor slow queries with Laravel Telescope (dev) or external tools (production).
+- Set up log rotation.
+
+---
+
+## 13. Testing
+- **Feature Tests**: Test HTTP endpoints and Livewire components (`php artisan make:test`).
+- **Unit Tests**: Test services, helpers, and models independently.
+- **Database Testing**: Use `RefreshDatabase` trait; run tests with SQLite in-memory for speed.
+- **Coverage Target**: >80% for critical business logic.
+- Run tests before pushing: `php artisan test`.
+- Use factories for all test data.
+
+---
+
+## 14. Version Control & CI/CD
+- **Branch Naming**: `feature/*`, `fix/*`, `chore/*`.
+- **Commit Convention**: Conventional Commits (e.g., `feat: add user profile livewire component`).
+- **CI Pipeline**: Run `composer lint`, `php artisan test`, `npm run build` on PRs.
+- **Deployment**: Use Laravel Forge, Envoyer, or custom Docker setup.
+- **Pre-commit Hooks**: Use GrumPHP or CaptainHook for automated code quality checks.
+
+---
+
+## 15. Docker (Development & Production)
+- The application may run inside Docker containers for environment consistency.
+- `docker-compose.yml` with services: `app` (PHP-FPM/Nginx), `db` (PostgreSQL), `redis` (optional), `queue` (optional).
+- Use service names for internal communication.
+- Persist database using volumes (`postgres-data:/var/lib/postgresql/data`).
+- Rebuild after composer/npm dependency changes.
+- Use multi-stage builds for production images.
+
+---
+
+## 16. Development Tools
+- **IDE**: PhpStorm or VS Code with PHP Intelephense, Laravel Idea, Tailwind CSS IntelliSense.
+- **DB GUI**: DBeaver (for PostgreSQL).
+- **Task Runner**: Laravel Sail (Docker) or native Composer scripts.
+
+---
+
+## 17. Pre-commit Checklist
+Before creating PR:
+- [ ] Code follows PSR-12 (PHP) and Laravel conventions.
+- [ ] Linting passes: `composer lint` (using Laravel Pint or similar).
+- [ ] All migrations run without errors: `php artisan migrate:fresh`.
+- [ ] Tests pass: `php artisan test`.
+- [ ] No `dd()`, `dump()`, or debug logs left in code.
+- [ ] `.env.example` updated with any new keys.
+- [ ] Authorization checks (policies) applied to new features.
+- [ ] Validation rules complete for all inputs.
+- [ ] Responsive design verified (mobile, tablet, desktop).
+- [ ] Loading and empty states handled in Livewire components.
+- [ ] Accessibility basics covered (ARIA labels, tab order).
+
+<!-- END:laravel-tall-agent-rules -->
