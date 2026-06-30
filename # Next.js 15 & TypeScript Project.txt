@@ -20,7 +20,7 @@ Before implementing any feature:
 - Icons: Lucide React
 - Validation: Zod
 - Database: PostgreSQL
-- ORM: Drizzle ORM
+- ORM: Prisma ORM
 - Notifications: SweetAlert2
 - Package Manager: npm (default) | pnpm | yarn (choose one)
 
